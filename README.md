@@ -1,5 +1,3 @@
-好的 ✅ 我帮你把 README 重新整理成一个可以直接复制粘贴的版本（排版清晰，Markdown 格式完整）：
-
 ```markdown
 # 🏥 Claims Management System
 
