@@ -1,0 +1,38 @@
+{% extends "claims/base.html" %}
+{% block title %}Claims List{% endblock %}
+{% block content %}
+<div class="layout">
+  <div class="card">
+    <h3 style="margin:0 0 8px 0;">Claims List</h3>
+    <form
+      hx-get="{% url 'claims_list' %}"
+      hx-target="#lazypaste-list"
+      hx-swap="innerHTML"    
+      class="search-bar"
+      style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:10px;"
+    >
+      <input class="input" type="text" name="q" placeholder="Search: Name / Insurer / Status / ID"
+             value="{{ q|default:'' }}" style="min-width:240px">
+      <select class="input" name="status">
+        <option value="">All Statuses</option>
+        {% for k, v in status_choices %}
+          <option value="{{ k }}" {% if status == k %}selected{% endif %}>{{ v }}</option>
+        {% endfor %}
+      </select>
+      <input class="input" type="text" name="insurer" placeholder="Insurer"
+             value="{{ insurer|default:'' }}">
+
+      <button class="btn primary" type="submit">Search</button>
+      <a class="btn" href="{% url 'claims_list' %}">Clear</a>
+    </form>
+  
+    <div id="lazypaste-list">
+      {% include "claims/_list.html" %}
+    </div>
+  </div>
+
+  <div id="lazypaste-detail" class="card">
+    <div class="muted">Select a record on the left to view details…</div>
+  </div>
+</div>
+{% endblock %}

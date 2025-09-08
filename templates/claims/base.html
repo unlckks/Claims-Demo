@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <title>{% block title %}Claims{% endblock %}</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <script src="https://unpkg.com/htmx.org@1.9.12"></script>
+  <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  <script src="https://unpkg.com/hyperscript.org@0.9.12"></script>
+
+  <style>
+    /* —— Your styles (keep as is) —— */
+    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial; margin: 16px; background: #f7f7fb; }
+    .layout { display: grid; grid-template-columns: 1.3fr 1fr; gap: 12px; }
+    .card { background: #fff; border: 1px solid #e6e6e6; border-radius: 10px; padding: 12px; }
+    .lazypaste-table { width: 100%; border-collapse: collapse; background: #fff; }
+    .lazypaste-table th, .lazypaste-table td { padding: 10px 12px; border-bottom: 1px solid #eee; }
+    .lazypaste-table thead th { background: #fafafa; }
+    .right { text-align:right; }
+    .nowrap { white-space:nowrap; }
+    .btn { border:1px solid #ddd; border-radius:8px; padding:6px 10px; background:#fafafa; cursor:pointer; }
+    .btn.primary { background:#2563eb; color:#fff; border-color:#2563eb; }
+    .tag { padding:2px 8px; border-radius:999px; font-size:12px; }
+    .tag.denied { background:#fee2e2; color:#991b1b; }
+    .tag.paid { background:#dcfce7; color:#065f46; }
+    .tag.review { background:#e0e7ff; color:#4338ca; }
+    .flag-btn { border:none; background:transparent; cursor:pointer; padding:4px; }
+    .flag-btn.on { color:#dc2626; }
+    .amount-zero { color:#dc2626; font-weight:600; }
+    .amount-positive { color:#16a34a; font-weight:600; }
+    .muted { color:#6b7280; }
+    .toast { position:fixed; top:16px; right:16px; background:rgba(0,0,0,.8); color:#fff; padding:10px 12px; border-radius:8px; display:none; }
+    .input { border:1px solid #e5e7eb; border-radius:8px; padding:6px 10px; }
+
+    .detail-grid { display:grid; grid-template-columns:1.1fr 1fr; gap:12px; }
+    .detail-card { border:1px solid #e6eaf2; border-radius:12px; background:#fff; padding:14px 16px; }
+    .detail-title { display:flex; align-items:center; gap:8px; font-weight:600; color:#1f2937; margin-bottom:8px; }
+    .badge-soft { padding:2px 8px; border-radius:999px; font-size:12px; font-weight:600; }
+    .badge-denied { color:#b91c1c; background:#fee2e2; }
+    .badge-paid { color:#065f46; background:#dcfce7; }
+    .badge-review { color:#4338ca; background:#e0e7ff; }
+    .detail-kv { display:grid; grid-template-columns:1fr 1fr; gap:10px 12px; margin-top:8px; }
+    .detail-kv .kv { display:flex; justify-content:space-between; align-items:baseline; gap:8px; padding:6px 0; }
+    .kv .label { color:#6b7280; }
+    .kv .value { color:#111827; font-weight:600; }
+    .money-red { color:#dc2626; font-weight:700; }
+    .money-muted { color:#6b7280; font-weight:600; }
+    .cpt-wrap { display:flex; gap:8px; flex-wrap:wrap; margin-top:6px; }
+    .cpt-pill { border:1px solid #e5e7eb; border-radius:999px; padding:4px 8px; font-size:12px; background:#f9fafb; color:#374151; }
+    .notes-card .note-item { border:1px solid #eef2f7; border-radius:10px; padding:10px 12px; background:#fff; }
+    .notes-card .note-item + .note-item { margin-top:8px; }
+    .note-head { display:flex; justify-content:space-between; align-items:center; }
+    .note-author { font-weight:600; color:#111827; }
+    .note-time { color:#9ca3af; font-size:12px; }
+    .note-body { margin-top:6px; white-space:pre-line; color:#374151; }
+    .quick-card { border:1px solid #e6eaf2; border-radius:12px; background:#fff; padding:8px; }
+    .quick-list { list-style:none; padding:0; margin:0; }
+    .quick-item { display:flex; align-items:center; gap:10px; padding:10px 12px; border-radius:10px; border:1px dashed transparent; cursor:pointer; background:#fff; }
+    .quick-item:hover { background:#f9fafb; border-color:#e5e7eb; }
+    .quick-icon { width:18px; height:18px; color:#6b7280; flex:0 0 18px; }
+    .quick-text { font-weight:600; color:#111827; }
+    .section-title { display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; font-weight:700; color:#1f2937; }
+  </style>
+</head>
+<body>
+
+<!-- Hidden csrf_token to ensure Django sets CSRF Cookie -->
+<form style="display:none">{% csrf_token %}</form>
+
+{% block content %}{% endblock %}
+
+<!-- a) Attach X-CSRFToken to all HTMX requests to avoid 403 errors -->
+<script>
+  function _getCookie(name) {
+    const m = document.cookie.match(new RegExp('(^|;)\\s*' + name + '\\s*=\\s*([^;]+)'));
+    return m ? decodeURIComponent(m.pop()) : '';
+  }
+  document.body.addEventListener('htmx:configRequest', (e) => {
+    e.detail.headers['X-CSRFToken'] = _getCookie('csrftoken');
+  });
+</script>
+
+<!-- b) Alpine + event listeners: handle toast and single-row refresh -->
+<script>
+  document.addEventListener('alpine:init', () => {
+    Alpine.store('ui', {
+      toastMsg: '',
+      showToast(msg) {
+        this.toastMsg = msg;
+        const el = document.getElementById('toast');
+        el.style.display = 'block';
+        clearTimeout(this._t);
+        this._t = setTimeout(() => {
+          this.toastMsg = '';
+          el.style.display = 'none';
+        }, 1500);
+      },
+    });
+
+    // Flag/unflag button inside detail view (send via htmx.ajax)
+    Alpine.data('flagBtn', ({ id, initial, postUrl, from }) => ({
+      on: initial,
+      loading: false,
+      toggle() {
+        if (this.loading) return;
+        this.loading = true;
+        // Optimistic toggle
+        this.on = !this.on;
+        // Send HTMX POST request, target is detail container
+        htmx.ajax('POST', postUrl, {
+          target: '#lazypaste-detail',
+          swap: 'innerHTML',
+          values: { from: from || 'detail' }
+        });
+        this.loading = false;
+      }
+    }));
+  });
+
+  // Listen for events triggered via HX-Trigger from backend
+  document.body.addEventListener('toast', (e) => Alpine.store('ui').showToast(e.detail.value));
+  document.body.addEventListener('refreshRow', async (e) => {
+    const { id, url } = e.detail.value || {};
+    if (!id || !url) return;
+    const r = await fetch(url, { headers: { 'HX-Request': 'true' }});
+    const html = await r.text();
+    const doc = new DOMParser().parseFromString(html, 'text/html');
+    const newRow = doc.querySelector('tr');
+    const oldRow = document.querySelector(`#row-${id}`);
+    if (oldRow && newRow) oldRow.replaceWith(newRow);
+  });
+</script>
+
+<div id="toast" class="toast" x-data x-show="$store.ui?.toastMsg" x-transition x-text="$store.ui?.toastMsg"></div>
+</body>
+</html>

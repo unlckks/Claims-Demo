@@ -1,0 +1,13 @@
+{% extends "claims/base.html" %}
+{% block content %}
+<div class="card lazypaste-login" style="max-width:400px;margin:40px auto">
+  <h2>login</h2>
+  <form method="post">{% csrf_token %}
+    <div class="lazypaste-login-fields">
+      <div>user</div><input name="username" class="lazypaste-input" required>
+      <div>password</div><input name="password" type="password" class="lazypaste-input" required>
+    </div>
+    <div style="margin-top:12px"><button class="btn primary">login</button></div>
+  </form>
+</div>
+{% endblock %}

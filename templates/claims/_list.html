@@ -1,0 +1,23 @@
+<div class="table-wrap">
+  <table class="lazypaste-table">
+    <thead>
+      <tr>
+        <th>Claim ID</th>
+        <th>Patient</th>
+        <th class="right">Billed</th>
+        <th class="right">Paid</th>
+        <th>Status</th>
+        <th>Insurer</th>
+        <th>Discharge Date</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody id="claims-tbody">
+      {% for c in claims %}
+        {% include "claims/_row.html" with c=c %}
+      {% empty %}
+        <tr><td colspan="8" class="muted">No records</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>

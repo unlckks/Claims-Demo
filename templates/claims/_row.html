@@ -1,0 +1,49 @@
+<tr id="row-{{ c.id }}">
+  <td class="claim-id">
+    <a href="#"
+       hx-get="{% url 'claims_detail' c.id %}"
+       hx-target="#lazypaste-detail"
+       hx-swap="innerHTML">{{ c.claim_id }}</a>
+  </td>
+  <td>{{ c.patient_name }}</td>
+  <td class="right">{{ c.billed_amount }} USD</td>
+  <td class="right">
+    {% if c.paid_amount == 0 %}
+      <span class="amount-zero">{{ c.paid_amount }} USD</span>
+    {% else %}
+      <span class="amount-positive">{{ c.paid_amount }} USD</span>
+    {% endif %}
+  </td>
+  <td>
+    {% if c.status == 'Denied' %}<span class="tag denied">Denied</span>
+    {% elif c.status == 'Paid' %}<span class="tag paid">Paid</span>
+    {% else %}<span class="tag review">Under Review</span>
+    {% endif %}
+  </td>
+  <td>{{ c.insurer_name }}</td>
+  <td class="nowrap">{{ c.discharge_date|date:"F j, Y" }}</td>
+  <td style="display:flex;gap:8px;align-items:center">
+    <button class="btn"
+            hx-get="{% url 'claims_detail' c.id %}"
+            hx-target="#lazypaste-detail"
+            hx-swap="innerHTML">View</button>
+
+    {% if c.flagged %}
+      <form
+        hx-post="{% url 'claims_flag' c.id %}"
+        hx-vals='{"from":"list"}'
+        hx-target="#row-{{ c.id }}"
+        hx-swap="outerHTML"
+        style="display:inline"
+      >
+        {% csrf_token %}
+        <button class="flag-btn on" title="Flagged, click to unflag">
+          <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M6 3v18M7 4h9l-1.5 3L18 10H7Z"
+                  stroke="currentColor" stroke-width="2" fill="currentColor"/>
+          </svg>
+        </button>
+      </form>
+    {% endif %}
+  </td>
+</tr>

@@ -1,0 +1,128 @@
+<div class="detail-grid" x-data="{ showNotes:true, showQuickNote:false }">
+
+    <!-- Left: Claim detail card -->
+    <div class="detail-card">
+        <div class="detail-title">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                <path d="M4 6a2 2 0 0 1 2-2h7l5 5v9a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6z" stroke="#64748b"
+                      stroke-width="1.5"/>
+            </svg>
+            <span>Claim Details - {{ claim.claim_id }}</span>
+
+            <span style="margin-left:auto"
+                  class="badge-soft {% if claim.status == 'Denied' %}badge-denied{% elif claim.status == 'Paid' %}badge-paid{% else %}badge-review{% endif %}">
+        {% if claim.status == 'Denied' %}Denied{% elif claim.status == 'Paid' %}Paid{% else %}Under Review{% endif %}
+      </span>
+        </div>
+
+        <div class="detail-kv">
+            <div class="kv"><span class="label">Patient:</span><span class="value">{{ claim.patient_name }}</span></div>
+            <div class="kv"><span class="label">Discharge Date:</span><span
+                    class="value">{{ claim.discharge_date|date:"F j, Y" }}</span></div>
+            <div class="kv"><span class="label">Billed Amount:</span><span
+                    class="value money-muted">{{ claim.billed_amount }} USD</span></div>
+            <div class="kv"><span class="label">Paid Amount:</span><span class="value money-red">{{ claim.paid_amount }} USD</span>
+            </div>
+            <div class="kv"><span class="label">Insurer:</span><span class="value">{{ claim.insurer_name }}</span></div>
+            <div class="kv"><span class="label">Underpayment:</span><span
+                    class="value">{{ claim.underpayment }} USD</span></div>
+        </div>
+
+        <div style="margin-top:12px">
+            <div class="kv">
+                <span class="label">CPT Codes:</span>
+                <span class="value">
+          {% if cpt_codes %}
+              <span class="cpt-wrap">
+              {% for code in cpt_codes %}
+                  <span class="cpt-pill">{{ code }}</span>
+              {% endfor %}
+            </span>
+          {% else %} — {% endif %}
+        </span>
+            </div>
+            <div class="kv" style="align-items:flex-start">
+                <span class="label" style="padding-top:4px">Denial Reason:</span>
+                <span class="value"
+                      style="font-weight:500; color:#b91c1c;">{{ claim.detail.denial_reason|default:"—" }}</span>
+            </div>
+        </div>
+    </div>  <!-- /detail-card Left -->
+
+    <!-- Right: Notes & Annotations card -->
+    <div class="detail-card notes-card">
+        <div class="section-title">
+            <span>Notes & Annotations</span>
+            <div style="display:flex; gap:8px">
+                <button class="btn" @click="showNotes = !showNotes" x-text="showNotes ? 'Collapse' : 'Expand'"></button>
+            </div>
+        </div>
+
+        <div x-show="showNotes" x-transition>
+            <div id="lazypaste-notes-list">
+                {% include "claims/_notes_block.html" with claim=claim %}
+            </div>
+            <form style="margin-top:10px"
+                  hx-post="{% url 'claims_add_note' claim.id %}"
+                  hx-target="#lazypaste-notes-list" hx-swap="outerHTML">
+                {% csrf_token %}
+                <textarea name="text" rows="3" class="input" style="width:100%;" placeholder="Add a note…"></textarea>
+                <div style="margin-top:8px; display:flex; gap:8px; justify-content:flex-end">
+                    <button class="btn primary">Submit Note</button>
+                </div>
+            </form>
+        </div>
+    </div> <!-- /detail-card Right -->
+
+    <!-- Bottom: Quick Actions (full row) -->
+    <div class="quick-card" style="grid-column: 1 / span 2; margin-top: 4px;">
+        <div class="section-title"><span>Quick Actions</span></div>
+        <ul class="quick-list">
+            <!-- ✅ Use form + csrf; backend returns HX-Refresh: true to reload the page -->
+            <li class="quick-item">
+                <form
+                        hx-post="{% url 'claims_flag' claim.id %}"
+                        hx-vals='{"from":"detail"}'
+                        style="display:flex; align-items:center; gap:10px"
+                >
+                    {% csrf_token %}
+                    <button class="btn">
+                        {% if claim.flagged %}Unflag{% else %}Flag for Review{% endif %}
+                    </button>
+                </form>
+            </li>
+
+            <li class="quick-item" @click="showQuickNote = !showQuickNote">
+                <svg class="quick-icon" viewBox="0 0 24 24" fill="none">
+                    <path d="M5 5h14v10H8l-3 3V5z" stroke="currentColor" stroke-width="1.8"/>
+                </svg>
+                <span class="quick-text">Add Quick Note</span>
+            </li>
+            <div x-show="showQuickNote" x-transition style="margin:8px 0 0 42px;">
+                <form
+                        hx-post="{% url 'claims_add_note' claim.id %}"
+                        hx-target="#lazypaste-notes-list" hx-swap="outerHTML"
+                        @htmx:after-request="showQuickNote=false">
+                    {% csrf_token %}
+                    <textarea name="text" rows="2" class="input" style="width:100%;"
+                              placeholder="Quickly add a note…"></textarea>
+                    <div style="margin-top:6px; display:flex; gap:8px; justify-content:flex-end">
+                        <button type="button" class="btn" @click="showQuickNote=false">Cancel</button>
+                        <button class="btn primary">Save</button>
+                    </div>
+                </form>
+            </div>
+
+            <li class="quick-item" hx-get="#" hx-disable="true"
+                title="Example: replace hx-get with your report endpoint">
+                <svg class="quick-icon" viewBox="0 0 24 24" fill="none">
+                    <path d="M7 3h7l4 4v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z" stroke="currentColor"
+                          stroke-width="1.8"/>
+                    <path d="M14 3v4h4" stroke="currentColor" stroke-width="1.8"/>
+                </svg>
+                <span class="quick-text">Generate Report</span>
+            </li>
+        </ul>
+    </div>
+
+</div> <!-- /detail-grid -->

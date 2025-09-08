@@ -1,0 +1,13 @@
+<div class="notes">
+  {% for n in claim.notes.all|dictsortreversed:"created_at" %}
+    <div class="card" style="padding:10px; margin-bottom:8px">
+      <div style="display:flex; justify-content:space-between; align-items:center">
+        <strong>{{ n.user.get_username }}</strong>
+        <span class="muted">{{ n.created_at|date:"Y-m-d H:i" }}</span>
+      </div>
+      <p style="margin:6px 0 0 0; white-space:pre-line">{{ n.text }}</p>
+    </div>
+  {% empty %}
+    <div class="muted">No notes yet</div>
+  {% endfor %}
+</div>
