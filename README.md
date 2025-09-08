@@ -1,6 +1,4 @@
-明白 ✅ 我帮你生成一个完整的 **README.md** 文件内容，你可以直接复制粘贴保存为 `README.md`：
-
-```markdown
+````markdown
 # 🏥 Claims Management System
 
 A lightweight **insurance claims management system** built with **Django**, **HTMX**, and **Alpine.js**.  
@@ -27,15 +25,14 @@ It provides an interactive UI to search, filter, view details, add notes, and fl
 ---
 
 ## 📂 Project Structure
-```
-
-erisa\_Project/
+```plaintext
+erisa_Project/
 ├─ manage.py
 ├─ db.sqlite3               # SQLite DB (auto-created after migrations)
 ├─ data/                    # Sample data
-│   ├─ claim\_list\_data.json
-│   └─ claim\_detail\_data.json
-├─ erisa\_Project/           # Project settings package
+│   ├─ claim_list_data.json
+│   └─ claim_detail_data.json
+├─ erisa_Project/           # Project settings package
 │   ├─ settings.py
 │   ├─ urls.py
 │   └─ ...
@@ -45,12 +42,11 @@ erisa\_Project/
 │   ├─ urls.py
 │   ├─ templates/claims/
 │   │   ├─ list.html
-│   │   ├─ \_detail.html
-│   │   ├─ \_notes.html
+│   │   ├─ _detail.html
+│   │   ├─ _notes.html
 │   │   └─ base.html
 │   └─ management/commands/
-│       └─ load\_claims.py
-
+│       └─ load_claims.py
 ````
 
 ---
@@ -58,13 +54,14 @@ erisa\_Project/
 ## 🚀 Setup & Run
 
 ### 1. Clone & Install
+
 ```bash
 git clone https://github.com/yourusername/claims-app
 cd claims-app
 python -m venv .venv
 .venv\Scripts\activate  # Windows
 pip install -r requirements.txt
-````
+```
 
 ### 2. Database Migration
 
@@ -86,7 +83,7 @@ Ensure `data/` contains:
 * `claim_list_data.json`
 * `claim_detail_data.json`
 
-Then run:
+Run:
 
 ```bash
 python manage.py load_claims --list data/claim_list_data.json --detail data/claim_detail_data.json --mode overwrite
@@ -107,7 +104,7 @@ Access:
 
 ## 📦 Data Format
 
-### claim\_list\_data.json
+### `claim_list_data.json`
 
 ```json
 [
@@ -123,7 +120,7 @@ Access:
 ]
 ```
 
-### claim\_detail\_data.json
+### `claim_detail_data.json`
 
 ```json
 [
@@ -142,10 +139,8 @@ Access:
 
 * Left panel: claim list with filters and search
 * Right panel: details load dynamically via HTMX
-* Quick actions: flag/unflag claims, add notes, generate report placeholder
+* Quick actions: flag/unflag claims, add notes
 * Notes: stored with user + timestamp
 
-```
+---
 
-要不要我帮你再写一个 **`requirements.txt` 示例**（Django、HTMX 等依赖）方便一键安装？
-```
