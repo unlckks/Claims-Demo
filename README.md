@@ -1,3 +1,5 @@
+明白 ✅ 我帮你生成一个完整的 **README.md** 文件内容，你可以直接复制粘贴保存为 `README.md`：
+
 ```markdown
 # 🏥 Claims Management System
 
@@ -143,4 +145,7 @@ Access:
 * Quick actions: flag/unflag claims, add notes, generate report placeholder
 * Notes: stored with user + timestamp
 
+```
+
+要不要我帮你再写一个 **`requirements.txt` 示例**（Django、HTMX 等依赖）方便一键安装？
 ```
